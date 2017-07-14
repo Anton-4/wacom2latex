@@ -125,10 +125,10 @@ object Main extends JFXApp {
       }
     }
 
-    val doublePath = coordToDoubleArr(approxPath)
-    val scaledArr = scalePath(doublePath)
+    //val doublePath = coordToDoubleArr(approxPath)
+    //val scaledArr = scalePath(doublePath)
 
-    pw.print(scaledArr.mkString(";"))
+    pw.print(approxPath.mkString(";"))
     pw.println(";" + latexText.toString)
 
 
