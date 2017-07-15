@@ -40,7 +40,11 @@ import scalafx.stage.WindowEvent
   *
   */
 
-class Coords(x: Double, y: Double) {
+case class Point(x: Double, y: Double) {
+
+  def distanceTo(p: Point) = {
+    math.hypot(x-p.x, y-p.y)
+  }
 
   override def toString() = {
     x.toString + ";" + y.toString
@@ -73,8 +77,8 @@ object Main extends JFXApp {
     fill = LightGreen
   }
 
-  val currCharPath = new ListBuffer[Coords]
-  val charPaths = new ListBuffer[List[Coords]]()
+  val currCharPath = new ListBuffer[Point]
+  val charPaths = new ListBuffer[ListBuffer[Point]]()
 
   val btnSave = new Button {
     text = "save"
@@ -108,22 +112,10 @@ object Main extends JFXApp {
 
     ImageIO.write(renderedImage, "png", file)
 
-
+    charPaths += currCharPath
     val path = charPaths(0)
 
-    val approxPath = Array.ofDim[Coords](approxPoints)
-    val jumpSize = if (path.size < approxPoints){
-      1
-    } else {
-      val ratio = path.size / approxPoints.toDouble
-      math.ceil(ratio).toInt
-    }
-    for( i <- 0 until approxPoints){
-      approxPath(i) = new Coords(-1.0, -1.0)
-      if (i * jumpSize < path.size){
-        approxPath(i) = path(i*jumpSize)
-      }
-    }
+    val approxPath = PathOptimizer.smartSubsetPoints(path, 32)
 
     //val doublePath = coordToDoubleArr(approxPath)
     //val scaledArr = scalePath(doublePath)
@@ -140,6 +132,7 @@ object Main extends JFXApp {
     }
     imageView.image = updateTex(latexText.toString)
 
+    currCharPath.clear()
     reset(Color.White, charPaths)
   }
 
@@ -168,26 +161,27 @@ object Main extends JFXApp {
     pw.close
   }
 
+
   canvas.onMousePressed = (e: MouseEvent) => {
     gc.beginPath()
     gc.rect(e.x, e.y, 1, 1)
     gc.moveTo(e.x, e.y)
     gc.stroke()
 
-    currCharPath += new Coords(e.x, e.y)
+    currCharPath += new Point(e.x, e.y)
   }
 
   canvas.onMouseDragged = (e: MouseEvent) => {
     if (e.x < canv_width && e.y < canv_height && e.x > 0 && e.y > 0) {
       gc.lineTo(e.x, e.y)
       gc.stroke()
-      currCharPath += new Coords(e.x, e.y)
+      currCharPath += new Point(e.x, e.y)
     }
   }
 
   canvas.onMouseReleased = (e: MouseEvent) => {
-    charPaths += currCharPath.toList
-    currCharPath.clear()
+    //charPaths += currCharPath.toList
+    //currCharPath.clear()
   }
 
   canvas.onMouseClicked = (e: MouseEvent) => {
@@ -196,7 +190,7 @@ object Main extends JFXApp {
     }
   }
 
-  private def reset(color: Color, charPaths: ListBuffer[List[Coords]]) = {
+  private def reset(color: Color, charPaths: ListBuffer[ListBuffer[Point]]) = {
     gc.fill = color
     gc.fillRect(0, 0, canvas.width.get, canvas.height.get)
     charPaths.clear()
@@ -220,7 +214,7 @@ object Main extends JFXApp {
     scaledPath
   }
 
-  def coordToDoubleArr(coordArr: Array[Coords]) : Array[Double] = {
+  def coordToDoubleArr(coordArr: Array[Point]) : Array[Double] = {
     val doubleArr = Array.ofDim[Double](coordArr.length * 2)
 
     for(i <- coordArr.indices){
