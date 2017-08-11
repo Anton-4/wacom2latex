@@ -84,12 +84,12 @@ object Main extends JFXApp {
     text = "save"
   }
 
+  var alphabet = List("a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z")
   var counter = 0
-  var latexText = 0
-  val latexDescriptor = "0to9"
+  val latexDescriptor = "a_to_z"
 
   val imageView = new ImageView()
-  imageView.image = updateTex(latexText.toString)
+  imageView.image = updateTex(alphabet(counter).toString)
   gridPane.add(imageView, 0, 0)
 
   val pw = new PrintWriter(
@@ -101,10 +101,10 @@ object Main extends JFXApp {
 
   btnSave.onAction = (event: ActionEvent) => {
     var postFix = 0
-    var file = new File(s"data/pics/${latexDescriptor}_${counter}_$postFix.png")
+    var file = new File(s"data/pics/${latexDescriptor}_${alphabet(counter)}_$postFix.png")
     while (file.exists) {
       postFix += 1
-      file = new File(s"data/pics/${latexDescriptor}_${counter}_$postFix.png")
+      file = new File(s"data/pics/${latexDescriptor}_${alphabet(counter)}_$postFix.png")
     }
     val writableImage = new WritableImage(canv_width, canv_height)
     canvas.snapshot(null, writableImage)
@@ -121,16 +121,14 @@ object Main extends JFXApp {
     //val scaledArr = scalePath(doublePath)
 
     pw.print(approxPath.mkString(";"))
-    pw.println(";" + latexText.toString)
+    pw.println(";" + alphabet(counter).toString)
 
 
     counter += 1
-    latexText += 1
-    if (counter == 10){
+    if (counter == alphabet.length){
       counter = 0
-      latexText = 0
     }
-    imageView.image = updateTex(latexText.toString)
+    imageView.image = updateTex(alphabet(counter).toString)
 
     currCharPath.clear()
     reset(Color.White, charPaths)
