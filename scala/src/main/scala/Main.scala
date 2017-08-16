@@ -34,12 +34,6 @@ import org.scilab.forge.jlatexmath.TeXIcon
 import scala.collection.mutable.ListBuffer
 import scalafx.stage.WindowEvent
 
-
-/**
-  * Example adapted from code showed in [[http://docs.oracle.com/javafx/2/canvas/jfxpub-canvas.htm]].
-  *
-  */
-
 case class Point(x: Double, y: Double) {
 
   def distanceTo(p: Point) = {
